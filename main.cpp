@@ -27,11 +27,11 @@
 #define PI 3.14159265
 #define DEGREES(x) int((x)/360.0*0xFFFFFF)
 #define RADIANS(x) int((x)/2/M_PI*0xFFFFFF)
-	
+
 using namespace std;
 
 bool keys[] = { false, false, false, false, false, false, false, false, false, false };
-enum KEYS{ UP, DOWN, LEFT, RIGHT, MOUSE_BUTTON, NUM_1, NUM_2, NUM_3, ENTER, SHIFT };
+enum KEYS { UP, DOWN, LEFT, RIGHT, MOUSE_BUTTON, NUM_1, NUM_2, NUM_3, ENTER, SHIFT };
 
 //Terrain creation
 void NewMap(ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_BITMAP *Tree_2_Image, ALLEGRO_BITMAP *Tree_3_Image, ALLEGRO_BITMAP *Tree_4_Image, ALLEGRO_BITMAP *Tree_5_Image, ALLEGRO_BITMAP *bgImage, ALLEGRO_BITMAP *BirdImage, int Map[MAPH][MAPW], double cameraXPos, double cameraYPos);
@@ -40,10 +40,10 @@ void NewMap(ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_
 void AllegroOverlay(int Map[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_BITMAP *Tree_2_Image, ALLEGRO_BITMAP *Tree_3_Image, ALLEGRO_BITMAP *Tree_4_Image, ALLEGRO_BITMAP *Tree_5_Image, ALLEGRO_BITMAP *bgImage, ALLEGRO_BITMAP *BirdImage, double cameraXPos, double cameraYPos);
 void Render(ALLEGRO_BITMAP *TerrainImage, int game_x, int game_y, int image_x, int image_y, int size_x, int size_y, double cameraXPos, double cameraYPos, bool collision);
 
-void IslandCultivation(int Island[ISLANDH][ISLANDW]);
+void CreateIsland(int Island[ISLANDH][ISLANDW]);
 
 //island generation specifics
-void IslandTiering(int Island[ISLANDH][ISLANDW]);
+void IslandBasic(int Island[ISLANDH][ISLANDW]);
 void IslandCornering(int Island[ISLANDH][ISLANDW]);
 void IslandDetailing(int Island[ISLANDH][ISLANDW]);
 
@@ -59,7 +59,7 @@ std::list<GameObject *>::iterator iter2;
 Background *TitleScreen;
 ALLEGRO_SAMPLE_INSTANCE *songInstance;
 
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
 
 	//==============================================
 	//SHELL VARIABLES
@@ -170,7 +170,7 @@ int main(int argc, char **argv){
 	FootSoldierImage = al_load_bitmap("FootSoldierImage.png");//("AnimTestingImage.png");
 	al_convert_mask_to_alpha(FootSoldierImage, al_map_rgb(255, 0, 255));
 
-	TerrainImage = al_load_bitmap("TerrainImageRuined.png");
+	TerrainImage = al_load_bitmap("TerrainImageS2.png");
 	al_convert_mask_to_alpha(TerrainImage, al_map_rgb(255, 255, 255));
 
 	PlayerImage = al_load_bitmap("PlayerImage.png");
@@ -286,7 +286,7 @@ int main(int argc, char **argv){
 				break;
 			case ALLEGRO_KEY_ENTER:
 				keys[ENTER] = true;
-				if (state == TITLE){
+				if (state == TITLE) {
 					ChangeState(state, PLAYING, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, Tree_1_Image, Tree_2_Image, Tree_3_Image, Tree_4_Image, Tree_5_Image, bgImage, BirdImage, player);
 				}
 				else if (state == PLAYING)
@@ -340,7 +340,7 @@ int main(int argc, char **argv){
 			}
 		}
 
-		if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP){
+		if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {
 			keys[MOUSE_BUTTON] = false;
 		}
 		//==============================================
@@ -366,7 +366,7 @@ int main(int argc, char **argv){
 				MouseAngle = atan2(mousey - player->GetY(), mousex - player->GetX()) * 180 / PI;//calculating MouseAngle for bullets and guns
 				if (MouseAngle < 0)
 					MouseAngle *= -1;
-				else if (MouseAngle > 0){
+				else if (MouseAngle > 0) {
 					MouseAngle = 360 - MouseAngle;
 				}
 				//camera control
@@ -374,7 +374,7 @@ int main(int argc, char **argv){
 					cameraXDir = -PLAYERVELX*(player->GetX() - (SCREENW / 2)) / 100;//velocity of camera is dependent on distance from player
 				else
 					cameraXDir = 0;
-				
+
 				if ((cameraYPos - -PLAYERVELY*(player->GetY() - (SCREENH / 2)) / 100) > 0 && (cameraYPos + SCREENW - -PLAYERVELY*(player->GetY() - (SCREENH / 2)) / 100) < WORLDH)
 					cameraYDir = -PLAYERVELY*(player->GetY() - (SCREENH / 2)) / 100;
 				else
@@ -409,20 +409,20 @@ int main(int argc, char **argv){
 					objects.push_back(gun);
 				}
 				else {
-					if (keys[UP]){//player movement
+					if (keys[UP]) {//player movement
 						player->MoveUp();
 					}
-					else if (keys[DOWN]){
+					else if (keys[DOWN]) {
 						player->MoveDown();
 					}
 					else {
 						player->ResetAnimation(1);
 					}
 
-					if (keys[LEFT]){
+					if (keys[LEFT]) {
 						player->MoveLeft();
 					}
-					else if (keys[RIGHT]){
+					else if (keys[RIGHT]) {
 						player->MoveRight();
 					}
 					else {
@@ -511,8 +511,8 @@ int main(int argc, char **argv){
 			//BEGIN PROJECT RENDER================
 			if (state == TITLE)
 				TitleScreen->Render();
-			else if (PLAYING){
-				for (iter = objects.begin(); iter != objects.end(); ++iter){
+			else if (PLAYING) {
+				for (iter = objects.begin(); iter != objects.end(); ++iter) {
 					(*iter)->Render();
 				}
 			}
@@ -592,9 +592,9 @@ void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &
 
 		NewMap(TerrainImage, Tree_1_Image, Tree_2_Image, Tree_3_Image, Tree_4_Image, Tree_5_Image, bgImage, BirdImage, Map, cameraXPos, cameraYPos);//function to create game map
 
-		for (int y = 0; y <= MAPH; y++){
-			for (int x = 0; x <= MAPW; x++){
-				if (Map[y][x] == TIER_1){
+		for (int y = 0; y <= MAPH; y++) {
+			for (int x = 0; x <= MAPW; x++) {
+				if (Map[y][x] == TIER_1) {
 					PlayerPosX = x*DIMW - cameraXPos;
 					PlayerPosY = y*DIMH - cameraYPos;
 					//cameraXPos = PlayerPosX - (SCREENW / 2);
@@ -627,26 +627,26 @@ void NewMap(ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_
 	int x = 1;
 	int y = 1;
 	bool create = true;
-
-	for (int a = 0; a < 10000; a++){
+	/*
+	for (int a = 0; a < 10000; a++) {
 
 		x = rand() % MAPW + 1;//sets random coordinate
 		y = rand() % MAPH + 1;
 
-		if (y + ISLANDH <= MAPH - (CLIFFH + BIG_CLIFFH) &&//checks whether its within Map
-			x + ISLANDW <= MAPW - (CLIFFH + BIG_CLIFFH)){
+		if (y + ISLANDH <= MAPH &&//checks whether its within Map
+			x + ISLANDW <= MAPW) {
 
-			for (int y1 = 0; y1 < ISLANDH; y1++){//checks whether other Islands are within it
-				for (int x1 = 0; x1 < ISLANDW; x1++){
+			for (int y1 = 0; y1 < ISLANDH; y1++) {//checks whether other Islands are within it
+				for (int x1 = 0; x1 < ISLANDW; x1++) {
 					if (Map[y1 + y][x1 + x] != 0)
 						create = false;
 				}
 			}
 
-			if (create == true){
-				IslandCultivation(Island);//creates Island
-				for (int r_y = 0; r_y < ISLANDH; r_y++){
-					for (int r_x = 0; r_x < ISLANDW; r_x++){
+			if (create == true) {
+				CreateIsland(Island);//creates Island
+				for (int r_y = 0; r_y < ISLANDH; r_y++) {
+					for (int r_x = 0; r_x < ISLANDW; r_x++) {
 						Map[r_y + y][r_x + x] = Island[r_y][r_x];//copies Island
 					}
 				}
@@ -655,52 +655,135 @@ void NewMap(ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_
 		create = true;
 	}
 	//creates foliage and map bottom
-	MapDecor(Map);
-	MapBase(Map);
+	//MapDecor(Map);
+	//MapBase(Map);
+	*/
+
+	//copies in Islands 
+	for (int y = 0; y + ISLANDH <= MAPH; y += ISLANDH) {
+		for (int x = 0; x + ISLANDW <= MAPW; x += ISLANDW) {
+
+			CreateIsland(Island);//creates Island
+			for (int r_y = 0; r_y < ISLANDH; r_y++) {
+				for (int r_x = 0; r_x < ISLANDW; r_x++) {
+					Map[r_y + y][r_x + x] = Island[r_y][r_x];//copies Island
+				}
+			}
+	//		x += 10;
+		}
+	//	y += 10;
+	}
+
+	//CreateFog(Map); ??
+
 	//sets ground to be displayed (matrix to console conversion)
 	cout << "ALLEGRO OVERLAY" << endl;
 	AllegroOverlay(Map, TerrainImage, Tree_1_Image, Tree_2_Image, Tree_3_Image, Tree_4_Image, Tree_5_Image, bgImage, BirdImage, cameraXPos, cameraYPos);
 }
 
 
-void IslandCultivation(int Island[ISLANDH][ISLANDW])
+void CreateIsland(int Island[ISLANDH][ISLANDW])
 {
-	IslandTiering(Island);//creates tiers
-	IslandCornering(Island);//adds in corners
-	IslandDetailing(Island);//creates shadows, backwall
+	IslandBasic(Island);//creates tiers
+	//IslandCornering(Island);//adds in corners
+	//IslandDetailing(Island);//creates shadows, backwall
 	//actual Island changing now done
-	for (int y = 0; y <= ISLANDH; y++){//setting up for Allegro Overlay+later tier work
+	/*for (int y = 0; y <= ISLANDH; y++){//setting up for Allegro Overlay+later tier work
 		for (int x = 0; x <= ISLANDW; x++){
 			if (Island[y][x] == 1){ Island[y][x] = TIER_1; }
 			if (Island[y][x] == 2){ Island[y][x] = TIER_2; }
 		}
-	}
+	}*/
 }
 
-void IslandTiering(int Island[ISLANDH][ISLANDW])
+void IslandBasic(int Island[ISLANDH][ISLANDW]) {
+	
+	//refreshing matrix
+	for (int y = 0; y < ISLANDH; y++) {
+		for (int x = 0; x < ISLANDW; x++) {
+			Island[y][x] = 0;
+		}
+	}
+
+	//creating grass
+	int path_h = ISLANDH/2;
+	int path_w = ISLANDW/2;
+
+	for (int a = 0; a < 20; a++) {
+
+		int direction = rand() % 4 + 1;
+
+		if (direction == 1) {//up		
+			path_h -= 1;
+		}
+		else if (direction == 2) {//down
+			path_h += 1;
+		}
+		else if (direction == 3) {//left
+			path_w -= 1;
+		}
+		else if (direction == 4) {//right
+			path_w += 1;
+		}
+
+		if (path_h < ISLANDH && path_h > 0 && path_w < ISLANDW && path_w > 0)
+			Island[path_h][path_w] = GRASS_FLOOR_1;
+	}
+	//adding in brick within grass
+	for (int y = 0; y + 2 <= ISLANDH; y += 2) {
+		for (int x = 0; x + 2 <= ISLANDW; x += 2) {
+			if (rand() % 4 + 1 == 1) {
+				if (Island[y][x] == GRASS_FLOOR_1)
+					Island[y][x] = BRICK_FLOOR_1;
+				if (Island[y + 1][x] == GRASS_FLOOR_1)
+					Island[y + 1][x] = BRICK_FLOOR_1;
+				if (Island[y][x + 1] == GRASS_FLOOR_1)
+					Island[y][x + 1] = BRICK_FLOOR_1;
+				if (Island[y + 1][x + 1] == GRASS_FLOOR_1)
+					Island[y + 1][x + 1] = BRICK_FLOOR_1;
+			}
+		}
+	}
+	//adding in scaffold within brick
+	for (int y = 0; y <= ISLANDH; y ++) {
+		for (int x = 0; x <= ISLANDW; x ++) {
+			if (rand() % 4 + 1 == 1) {
+				if (Island[y][x] == BRICK_FLOOR_1)
+					Island[y][x] = SCAFFOLD_FLOOR_1;
+			}
+		}
+	}
+	//adding in mixed blocks
+	//adding in base
+	//adding in detailing?
+
+}
+
+
+/*void IslandBasic(int Island[ISLANDH][ISLANDW])
 {
 	//refreshing matrix
 	for (int y = 0; y < ISLANDH; y++){
-		for (int x = 0; x < ISLANDW; x++){//setting tiers up	(0)		
+		for (int x = 0; x < ISLANDW; x++){//setting tiers up	(0)
 			Island[y][x] = 0;
 		}
 	}
 	//creating box of 1's
 	for (int y = ISLANDBORDERH; y < ISLANDH - ISLANDBORDERH; y++){
-		for (int x = ISLANDBORDERW; x < ISLANDW - ISLANDBORDERW; x++){//setting tiers up	(1)		
+		for (int x = ISLANDBORDERW; x < ISLANDW - ISLANDBORDERW; x++){//setting tiers up	(1)
 			Island[y][x] = 1;
 		}
 	}
 	//growing 2's on 1's
 	for (int y = ISLANDBORDERH; y < ISLANDH - ISLANDBORDERH; y++){
-		for (int x = ISLANDBORDERW; x < ISLANDW - ISLANDBORDERW; x++){//setting tiers up	(2)		
+		for (int x = ISLANDBORDERW; x < ISLANDW - ISLANDBORDERW; x++){//setting tiers up	(2)
 			int chance = rand() % 6;
 			if (chance == 1)
 				Island[y][x] = 2;
 		}
 	}
 	//eliminating growth in front
-	for (int x = ISLANDBORDERW; x < ISLANDW - ISLANDBORDERW; x++){//setting tiers up	(3)		
+	for (int x = ISLANDBORDERW; x < ISLANDW - ISLANDBORDERW; x++){//setting tiers up	(3)
 		Island[ISLANDH - ISLANDBORDERH - 1][x] = 1;
 	}
 
@@ -737,12 +820,13 @@ void IslandTiering(int Island[ISLANDH][ISLANDW])
 	}
 
 
-}
+}*/
+/*
 void IslandCornering(int Island[ISLANDH][ISLANDW])
 {
 
-	for (int y = 0; y < ISLANDH; y++){//wall cornering!
-		for (int x = 0; x < ISLANDW; x++){
+	for (int y = 0; y < ISLANDH; y++) {//wall cornering!
+		for (int x = 0; x < ISLANDW; x++) {
 
 			if (Island[y][x] == WALL_END_T2 &&
 				Island[y][x + 1] == 2)
@@ -766,8 +850,8 @@ void IslandCornering(int Island[ISLANDH][ISLANDW])
 
 		}
 	}
-	for (int y = 0; y < ISLANDH; y++){//wall cornering(2)!
-		for (int x = 0; x < ISLANDW; x++){
+	for (int y = 0; y < ISLANDH; y++) {//wall cornering(2)!
+		for (int x = 0; x < ISLANDW; x++) {
 			if (Island[y][x] == WALL_COR_TOP_RIGHT_T2 &&
 				Island[y + 1][x] == WALL)
 			{
@@ -791,25 +875,25 @@ void IslandCornering(int Island[ISLANDH][ISLANDW])
 			}
 		}
 	}
-	for (int y = 0; y < ISLANDH; y++){//wall cornering(3)!
-		for (int x = 0; x < ISLANDW; x++){
+	for (int y = 0; y < ISLANDH; y++) {//wall cornering(3)!
+		for (int x = 0; x < ISLANDW; x++) {
 			if (Island[y][x] == WALL_COR_LEFT &&
-				Island[y + 1][x] == 1){
+				Island[y + 1][x] == 1) {
 				Island[y][x] = WALL_COR_LEFT;
 				Island[y + 1][x] = WALL_COR_BOT_LEFT_T1;
 			}
 			if (Island[y][x] == WALL_COR_LEFT &&
-				Island[y + 1][x] == 2){
+				Island[y + 1][x] == 2) {
 				Island[y][x] = WALL_COR_LEFT;
 				Island[y + 1][x] = WALL_COR_BOT_LEFT_T2;
 			}
 			if (Island[y][x] == WALL_COR_RIGHT &&
-				Island[y + 1][x] == 1){
+				Island[y + 1][x] == 1) {
 				Island[y][x] = WALL_COR_RIGHT;
 				Island[y + 1][x] = WALL_COR_BOT_RIGHT_T1;
 			}
 			if (Island[y][x] == WALL_COR_RIGHT &&
-				Island[y + 1][x] == 2){
+				Island[y + 1][x] == 2) {
 				Island[y][x] = WALL_COR_RIGHT;
 				Island[y + 1][x] = WALL_COR_BOT_RIGHT_T2;
 			}
@@ -820,14 +904,14 @@ void IslandCornering(int Island[ISLANDH][ISLANDW])
 void IslandDetailing(int Island[ISLANDH][ISLANDW])
 {
 
-	for (int y = 0; y <= ISLANDH; y++){// shadowing (1)
-		for (int x = 0; x <= ISLANDW; x++){
+	for (int y = 0; y <= ISLANDH; y++) {// shadowing (1)
+		for (int x = 0; x <= ISLANDW; x++) {
 			if (Island[y][x] == 1 &&
 				(Island[y][x + 1] == 2 ||
-				Island[y][x + 1] == WALL ||
-				Island[y][x + 1] == WALL_END_T2 ||
-				Island[y][x + 1] == WALL_COR_LEFT ||
-				Island[y][x + 1] == WALL_COR_TOP_LEFT_T2))
+					Island[y][x + 1] == WALL ||
+					Island[y][x + 1] == WALL_END_T2 ||
+					Island[y][x + 1] == WALL_COR_LEFT ||
+					Island[y][x + 1] == WALL_COR_TOP_LEFT_T2))
 				Island[y][x] = DETAIL_SHADOW_T1_1;
 
 			if (Island[y][x] == WALL_COR_BOT_LEFT_T1 &&
@@ -848,8 +932,8 @@ void IslandDetailing(int Island[ISLANDH][ISLANDW])
 		}
 	}
 
-	for (int y = 0; y <= ISLANDH; y++){// back rounding (2)
-		for (int x = 0; x <= ISLANDW; x++){
+	for (int y = 0; y <= ISLANDH; y++) {// back rounding (2)
+		for (int x = 0; x <= ISLANDW; x++) {
 			if (Island[y][x] == 2 && Island[y][x + 1] == 0 && Island[y][x - 1] == 0)
 				Island[y][x] = 0;
 			if (Island[y][x] == 2 && Island[y][x - 1] == 0 && Island[y][x + 1] != 0 && Island[y - 1][x] == 0)
@@ -864,9 +948,9 @@ void IslandDetailing(int Island[ISLANDH][ISLANDW])
 		}
 	}
 
-	for (int y = 0; y <= ISLANDH; y++){// back rounding (3)
-		for (int x = 0; x <= ISLANDW; x++){
-			if (Island[y][x] == WALL_BACK_LEFT_T2 && Island[y][x + 1] == WALL_BACK_RIGHT_T2){
+	for (int y = 0; y <= ISLANDH; y++) {// back rounding (3)
+		for (int x = 0; x <= ISLANDW; x++) {
+			if (Island[y][x] == WALL_BACK_LEFT_T2 && Island[y][x + 1] == WALL_BACK_RIGHT_T2) {
 				Island[y][x] = 2;
 				Island[y][x + 1] = 2;
 			}
@@ -881,15 +965,15 @@ void IslandDetailing(int Island[ISLANDH][ISLANDW])
 		}
 	}
 
-	for (int y = 0; y <= ISLANDH; y++){// back rounding (4)
-		for (int x = 0; x <= ISLANDW; x++){
+	for (int y = 0; y <= ISLANDH; y++) {// back rounding (4)
+		for (int x = 0; x <= ISLANDW; x++) {
 			if (Island[y][x] == 2 && Island[y - 1][x] == 0 &&
 				(Island[y][x + 1] == 1 ||
-				Island[y][x + 1] == DETAIL_SHADOW_T1_1 ||
-				Island[y][x + 1] == DETAIL_SHADOW_T1_2 ||
-				Island[y][x - 1] == 1 ||
-				Island[y][x - 1] == DETAIL_SHADOW_T1_1 ||
-				Island[y][x - 1] == DETAIL_SHADOW_T1_2))
+					Island[y][x + 1] == DETAIL_SHADOW_T1_1 ||
+					Island[y][x + 1] == DETAIL_SHADOW_T1_2 ||
+					Island[y][x - 1] == 1 ||
+					Island[y][x - 1] == DETAIL_SHADOW_T1_1 ||
+					Island[y][x - 1] == DETAIL_SHADOW_T1_2))
 				Island[y - 1][x] = 2;
 			if (Island[y][x] == WALL_END_T2 && Island[y - 1][x] == 0)
 				Island[y - 1][x] = 2;
@@ -899,8 +983,8 @@ void IslandDetailing(int Island[ISLANDH][ISLANDW])
 
 void MapDecor(int Map[MAPH][MAPW])
 {
-	for (int y = 0; y <= MAPH; y++){
-		for (int x = 0; x <= MAPW; x++){//island shadowing
+	for (int y = 0; y <= MAPH; y++) {
+		for (int x = 0; x <= MAPW; x++) {//island shadowing
 
 			if ((Map[y][x] == TIER_1
 				|| Map[y][x] == WALL_COR_BOT_LEFT_T1
@@ -909,58 +993,49 @@ void MapDecor(int Map[MAPH][MAPW])
 				|| Map[y][x] == DETAIL_SHADOW_COR_T1_1
 				|| Map[y][x] == DETAIL_SHADOW_COR_T1_2) &&
 				(Map[y][x - 1] == 0
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_1
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_2
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_1)){
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_1
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_2
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_1)) {
 
 				Map[y + BIG_CLIFFH][x - 1] = DETAIL_SHADOW_BASE_1;
 			}
 			else if (Map[y][x] == WALL_BACK_LEFT_T1 &&
 				(Map[y][x - 1] == 0
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_1
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_2
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_1)){
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_1
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_2
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_1)) {
 
 				Map[y + BIG_CLIFFH][x - 1] = DETAIL_SHADOW_BASE_COR_2;
 			}
 			else if (Map[y][x] == WALL_COR_TOP_LEFT_T1 &&
 				(Map[y][x - 1] == 0
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_1
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_2
-				|| Map[y][x - 1] == DETAIL_SHADOW_BASE_1)){
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_1
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_COR_2
+					|| Map[y][x - 1] == DETAIL_SHADOW_BASE_1)) {
 
 				Map[y + BIG_CLIFFH][x - 1] = DETAIL_SHADOW_BASE_COR_1;
 			}
 			else if (Map[y][x] == TIER_2 && Map[y][x - 1] == 0 &&
 				(Map[y + BIG_CLIFFH + CLIFFH][x - 1] == 0
-				|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_COR_1
-				|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_COR_2
-				|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_1)){
+					|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_COR_1
+					|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_COR_2
+					|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_1)) {
 
 				Map[y + BIG_CLIFFH + CLIFFH][x - 1] = DETAIL_SHADOW_BASE_1;
 			}
 			else if (Map[y][x] == WALL_BACK_LEFT_T2 &&
 				(Map[y + BIG_CLIFFH + CLIFFH][x - 1] == 0
-				|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_COR_1
-				|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_COR_2
-				|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_1)){
+					|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_COR_1
+					|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_COR_2
+					|| Map[y + BIG_CLIFFH + CLIFFH][x - 1] == DETAIL_SHADOW_BASE_1)) {
 
 				Map[y + BIG_CLIFFH + CLIFFH][x - 1] = DETAIL_SHADOW_BASE_COR_2;
 			}
 		}
 	}
-	/*for (int y = 0; y <= MAPH; y++){
-	for (int x = 0; x <= MAPW; x++){//island shadowing
-	if ((Map[y][x] == FADE_1
-	|| Map[y][x] == FADE_2
-	|| Map[y][x] == FADE_END)
-	&& Map[y][x - 1] == 0)
-	Map[y][x - 1] = DETAIL_SHADOW_BASE_1;
-	}
-	}*/
 
-	for (int y = 0; y <= MAPH; y++){
-		for (int x = 0; x <= MAPW; x++){//island shadowing
+	for (int y = 0; y <= MAPH; y++) {
+		for (int x = 0; x <= MAPW; x++) {//island shadowing
 			if (Map[y][x] == DETAIL_SHADOW_BASE_1 &&
 				Map[y + 1][x] != DETAIL_SHADOW_BASE_1 &&
 				Map[y + 2][x] == DETAIL_SHADOW_BASE_1)
@@ -968,7 +1043,7 @@ void MapDecor(int Map[MAPH][MAPW])
 			if (Map[y][x] == DETAIL_SHADOW_BASE_1 &&
 				Map[y + 1][x] != DETAIL_SHADOW_BASE_1 &&
 				Map[y + 2][x] != DETAIL_SHADOW_BASE_1 &&
-				Map[y + 3][x] == DETAIL_SHADOW_BASE_1){
+				Map[y + 3][x] == DETAIL_SHADOW_BASE_1) {
 				Map[y + 1][x] = DETAIL_SHADOW_BASE_1;
 				Map[y + 2][x] = DETAIL_SHADOW_BASE_1;
 			}
@@ -977,8 +1052,8 @@ void MapDecor(int Map[MAPH][MAPW])
 
 
 	int chance = 0;
-	for (int y = 0; y <= MAPH; y++){//island tree seeding
-		for (int x = 0; x <= MAPW; x++){
+	for (int y = 0; y <= MAPH; y++) {//island tree seeding
+		for (int x = 0; x <= MAPW; x++) {
 
 			chance = rand() % 5 + 1;
 
@@ -990,7 +1065,7 @@ void MapDecor(int Map[MAPH][MAPW])
 				(Map[y - 1][x + 1] == TIER_1 || Map[y - 1][x + 1] == DETAIL_SHADOW_T1_1 || Map[y - 1][x + 1] == DETAIL_SHADOW_T1_2 || Map[y - 1][x + 1] == DETAIL_SHADOW_COR_T1_1 || Map[y - 1][x + 1] == DETAIL_SHADOW_COR_T1_2 || Map[y - 1][x + 1] == DETAIL_SHADOW_COR_T1_3) &&
 				(Map[y + 1][x] == TIER_1 || Map[y + 1][x] == DETAIL_SHADOW_T1_1 || Map[y + 1][x] == DETAIL_SHADOW_T1_2 || Map[y + 1][x] == DETAIL_SHADOW_COR_T1_1 || Map[y + 1][x] == DETAIL_SHADOW_COR_T1_2 || Map[y + 1][x] == DETAIL_SHADOW_COR_T1_3) &&
 				(Map[y - 1][x] == TIER_1 || Map[y - 1][x] == DETAIL_SHADOW_T1_1 || Map[y - 1][x] == DETAIL_SHADOW_T1_2 || Map[y - 1][x] == DETAIL_SHADOW_COR_T1_1 || Map[y - 1][x] == DETAIL_SHADOW_COR_T1_2 || Map[y - 1][x] == DETAIL_SHADOW_COR_T1_3) &&
-				(Map[y][x] == TIER_1 || Map[y][x] == DETAIL_SHADOW_T1_1 || Map[y][x] == DETAIL_SHADOW_T1_2 || Map[y][x] == DETAIL_SHADOW_COR_T1_1 || Map[y][x] == DETAIL_SHADOW_COR_T1_2 || Map[y][x] == DETAIL_SHADOW_COR_T1_3)){
+				(Map[y][x] == TIER_1 || Map[y][x] == DETAIL_SHADOW_T1_1 || Map[y][x] == DETAIL_SHADOW_T1_2 || Map[y][x] == DETAIL_SHADOW_COR_T1_1 || Map[y][x] == DETAIL_SHADOW_COR_T1_2 || Map[y][x] == DETAIL_SHADOW_COR_T1_3)) {
 
 				if (chance == 1 && Map[y][x - 2] == TIER_1 || Map[y][x - 2] == DETAIL_SHADOW_T1_1 || Map[y][x - 2] == DETAIL_SHADOW_T1_2 || Map[y][x - 2] == DETAIL_SHADOW_COR_T1_1 || Map[y][x - 2] == DETAIL_SHADOW_COR_T1_2 || Map[y][x - 2] == DETAIL_SHADOW_COR_T1_3)
 					Map[y][x] = TREE_SEED_1;
@@ -1005,44 +1080,11 @@ void MapDecor(int Map[MAPH][MAPW])
 			}
 		}
 	}
-	/*for (int y = 0; y <= MAPH; y++){
-	for (int x = 0; x <= MAPW; x++){
-	if (Map[y][x] == TIER_1 && rand() % 10 == 2)
-	Map[y][x] = BUSH_SEED_1;
-	}
-	}
-	*/
-	/*for (int y = 0; y <= MAPH; y++){
-	for (int x = 0; x <= MAPW; x++){
-	if (Map[y][x] == TIER_1 && rand() % 10 == 2)
-	Map[y][x] = BIRD_SEED_1;
-	}
-	}*/
-
 }
 void MapBase(int Map[MAPH][MAPW])
 {
-	/*
-	for (int y = 0; y <= MAPH; y++){//creation of border
-	for (int x = 0; x <= MAPW; x++){
-	if ((x == 2 && (y >= 2 && y <= MAPH - 2)) ||
-	(x == MAPW - 2 && (y >= 2 && y <= MAPH - 2)) ||
-	(y == 2 && (x >= 2 && x <= MAPW - 2)) ||
-	(y == MAPH - 2 && (x >= 2 && x <= MAPW - 2)))
-	Map[y][x] = TIER_1;
-	}
-	int counter = 0;
-	for (int y = 0; y <= MAPH; y++){
-	for (int x = 0; x <= MAPW; x++){
-	counter++;
-	if (counter == 10){
-	Map[y][x] = TREE_SEED_2;
-	counter = 0;
-	}
-	}
-	}*/
-	for (int y = 0; y <= MAPH; y++){//creation of fadeaway (1)
-		for (int x = 0; x <= MAPW; x++){
+	for (int y = 0; y <= MAPH; y++) {//creation of fadeaway (1)
+		for (int x = 0; x <= MAPW; x++) {
 
 			if ((Map[y][x] == WALL ||
 				Map[y][x] == TIER_1 ||
@@ -1055,10 +1097,10 @@ void MapBase(int Map[MAPH][MAPW])
 		}
 	}
 
-	for (int y = 0; y <= MAPH; y++){//creation of fadeaway (2)
-		for (int x = 0; x <= MAPW; x++){
-			if (Map[y][x] == FADE_1){
-				for (int a = 1; a < (BIG_CLIFFH); a++){ //rand() % 4 + 2
+	for (int y = 0; y <= MAPH; y++) {//creation of fadeaway (2)
+		for (int x = 0; x <= MAPW; x++) {
+			if (Map[y][x] == FADE_1) {
+				for (int a = 1; a < (BIG_CLIFFH); a++) { //rand() % 4 + 2
 					if (Map[y + a][x] == 0 && y + a <= MAPH)
 						Map[y + a][x] = FADE_2;
 				}
@@ -1066,8 +1108,8 @@ void MapBase(int Map[MAPH][MAPW])
 		}
 	}
 
-	for (int y = 0; y <= MAPH; y++){//creation of fadeaway (3)
-		for (int x = 0; x <= MAPW; x++){
+	for (int y = 0; y <= MAPH; y++) {//creation of fadeaway (3)
+		for (int x = 0; x <= MAPW; x++) {
 
 
 			if (Map[y][x] == WALL_COR_RIGHT && Map[y + 1][x] == FADE_2)
@@ -1084,8 +1126,8 @@ void MapBase(int Map[MAPH][MAPW])
 		}
 	}
 
-	for (int y = 0; y <= MAPH; y++){//creation of fadeaway (4)
-		for (int x = 0; x <= MAPW; x++){
+	for (int y = 0; y <= MAPH; y++) {//creation of fadeaway (4)
+		for (int x = 0; x <= MAPW; x++) {
 			if (Map[y][x] == FADE_2 && Map[y + 1][x] == 0)
 				Map[y][x] = FADE_END;
 		}
@@ -1093,11 +1135,11 @@ void MapBase(int Map[MAPH][MAPW])
 
 	int a = 1;
 
-	for (int y = 0; y <= MAPH; y++){//creation of fadeaway (5)
-		for (int x = 0; x <= MAPW; x++){
-			if (Map[y][x] == WALL_COR_TOP_LEFT_T1){
+	for (int y = 0; y <= MAPH; y++) {//creation of fadeaway (5)
+		for (int x = 0; x <= MAPW; x++) {
+			if (Map[y][x] == WALL_COR_TOP_LEFT_T1) {
 				a = 1;
-				while ((Map[y + a][x + 1] != FADE_END) && (Map[y + a][x + 1] != TIER_2) && (Map[y + a][x + 1] != TIER_1)){
+				while ((Map[y + a][x + 1] != FADE_END) && (Map[y + a][x + 1] != TIER_2) && (Map[y + a][x + 1] != TIER_1)) {
 					Map[y + a][x] = WALL_COR_LEFT;
 					a++;
 				}
@@ -1105,9 +1147,9 @@ void MapBase(int Map[MAPH][MAPW])
 				a = 1;
 			}
 
-			if (Map[y][x] == WALL_COR_TOP_RIGHT_T1){
+			if (Map[y][x] == WALL_COR_TOP_RIGHT_T1) {
 				a = 1;
-				while ((Map[y + a][x - 1] != FADE_END) && (Map[y + a][x - 1] != TIER_2) && (Map[y + a][x - 1] != TIER_1)){
+				while ((Map[y + a][x - 1] != FADE_END) && (Map[y + a][x - 1] != TIER_2) && (Map[y + a][x - 1] != TIER_1)) {
 					Map[y + a][x] = WALL_COR_RIGHT;
 					a++;
 				}
@@ -1116,15 +1158,45 @@ void MapBase(int Map[MAPH][MAPW])
 			}
 		}
 	}
+}*/
 
-	/*for (int y = 0; y <= MAPH; y++){
-		for (int x = 0; x <= MAPW; x++){//creation of border
-			if (!Map[y][x] == 0)
-				Map[y][x] = WALL_COR_BOT_LEFT_T0;
+void AllegroOverlay(int Map[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_BITMAP *Tree_2_Image, ALLEGRO_BITMAP *Tree_3_Image, ALLEGRO_BITMAP *Tree_4_Image, ALLEGRO_BITMAP *Tree_5_Image, ALLEGRO_BITMAP *bgImage, ALLEGRO_BITMAP *BirdImage, double cameraXPos, double cameraYPos) {
+	for (int y = 0; y <= MAPH; y++) {
+		for (int x = 0; x <= MAPW; x++) {
+
+			if (Map[y][x] == SCAFFOLD_FLOOR_1) {
+				Render(TerrainImage, x, y, 0, 0, DIMW, DIMH, cameraXPos, cameraYPos, false);
+			}
+			else if (Map[y][x] == SCAFFOLD_BASE_1) {
+				Render(TerrainImage, x, y, 0, 1, DIMW, DIMH, cameraXPos, cameraYPos, false);
+			}
+			else if (Map[y][x] == BRICK_FLOOR_1) {
+				Render(TerrainImage, x, y, 1, 0, DIMW, DIMH, cameraXPos, cameraYPos, false);
+			}
+			else if (Map[y][x] == BRICK_BASE_1) {
+				Render(TerrainImage, x, y, 1, 1, DIMW, DIMH, cameraXPos, cameraYPos, false);
+			}
+			else if (Map[y][x] == GRASS_FLOOR_1) {
+				Render(TerrainImage, x, y, 5, 0, DIMW, DIMH, cameraXPos, cameraYPos, false);
+			}
+			else if (Map[y][x] == GRASS_BASE_1) {
+				Render(TerrainImage, x, y, 5, 1, DIMW, DIMH, cameraXPos, cameraYPos, false);
+			}
 		}
-	}*/
+	}
+	/*
+		const int MIX_SCAFFOLD_BRICK_LEFT_FLOOR_1 = 35;
+		const int MIX_SCAFFOLD_BRICK_RIGHT_FLOOR_1 = 40;
+		const int MIX_SCAFFOLD_BRICK_LEFT_BASE_1 = 45;
+		const int MIX_SCAFFOLD_BRICK_RIGHT_BASE_1 = 50;
+
+		const int MIX_GRASS_BRICK_LEFT_FLOOR_1 = 55;
+		const int MIX_GRASS_BRICK_RIGHT_FLOOR_1 = 60;
+		const int MIX_GRASS_BRICK_LEFT_BASE_1 = 65;
+		const int MIX_GRASS_BRICK_RIGHT_BASE_1 = 70;*/
 }
 
+/*
 void AllegroOverlay(int Map[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_BITMAP *Tree_2_Image, ALLEGRO_BITMAP *Tree_3_Image, ALLEGRO_BITMAP *Tree_4_Image, ALLEGRO_BITMAP *Tree_5_Image, ALLEGRO_BITMAP *bgImage, ALLEGRO_BITMAP *BirdImage, double cameraXPos, double cameraYPos)
 {
 	//Render(bgImage, 0, 0, 0, 0, 5000, 5000, cameraXPos, cameraYPos, false);
@@ -1381,6 +1453,7 @@ void AllegroOverlay(int Map[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, ALLEGRO_B
 		}
 	}
 }
+*/
 void Render(ALLEGRO_BITMAP *Image, int game_x, int game_y, int image_x, int image_y, int size_x, int size_y, double cameraXPos, double cameraYPos, bool collision)
 {
 	Terrain *terrain = new Terrain();

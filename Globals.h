@@ -3,11 +3,15 @@ const int DIMW = 50, DIMH = 50;//ground tile size, among other things
 const int SCREENW = 1680, SCREENH = 1050;//console size
 const int WORLDW = 2000, WORLDH = 2000;//map size
 const int MAPW = WORLDW / DIMW, MAPH = WORLDH / DIMH;//for ground matrix
-const int ISLANDBORDERH = 6, ISLANDBORDERW = 6;
-const int ISLANDW = 14 + ISLANDBORDERW, ISLANDH = 14 + ISLANDBORDERH, CLIFFH = 2, BIG_CLIFFH = 3;
+
+//const int ISLANDBORDERH = 6, ISLANDBORDERW = 6;
+//const int ISLANDW = 14 + ISLANDBORDERW, ISLANDH = 14 + ISLANDBORDERH, CLIFFH = 2, BIG_CLIFFH = 3;
+
+const int ISLANDW = 10, ISLANDH = 10;
 const int FPS = 60;
 const int WALL_DISP = 60;
 const int PLAYERVELX = 5, PLAYERVELY = 5;
+
 enum ID{ PLAYER, FOOTSOLDIER, TERRAIN_EMPTY, TERRAIN_FULL, WEAPON, BULLET, MISC};
 enum STATE{ TITLE, PLAYING, LOST };
 
@@ -103,15 +107,15 @@ const int SCAFFOLD_FLOOR_1 = 5;
 const int SCAFFOLD_BASE_1 = 10;
 const int BRICK_FLOOR_1 = 15;
 const int BRICK_BASE_1 = 20;
-const int DIRT_FLOOR_1 = 25;
-const int DIRT_BASE = 30;
+const int GRASS_FLOOR_1 = 25;
+const int GRASS_BASE_1 = 30;
 
 const int MIX_SCAFFOLD_BRICK_LEFT_FLOOR_1 = 35;
 const int MIX_SCAFFOLD_BRICK_RIGHT_FLOOR_1 = 40;
 const int MIX_SCAFFOLD_BRICK_LEFT_BASE_1 = 45;
 const int MIX_SCAFFOLD_BRICK_RIGHT_BASE_1 = 50;
 
-const int MIX_DIRT_BRICK_LEFT_FLOOR_1 = 55;
-const int MIX_DIRT_BRICK_RIGHT_FLOOR_1 = 60;
-const int MIX_DIRT_BRICK_LEFT_BASE_1 = 65;
-const int MIX_DIRT_BRICK_RIGHT_BASE_1 = 70;
+const int MIX_GRASS_BRICK_LEFT_FLOOR_1 = 55;
+const int MIX_GRASS_BRICK_RIGHT_FLOOR_1 = 60;
+const int MIX_GRASS_BRICK_LEFT_BASE_1 = 65;
+const int MIX_GRASS_BRICK_RIGHT_BASE_1 = 70;
