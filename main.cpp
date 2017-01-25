@@ -723,9 +723,9 @@ void CreateIsland(int Island[ISLANDH][ISLANDW]) {
 
 				//cardinal directions-
 				if (Island[y][x] == BRICK_FLOOR && Island[y][x + 1] == GRASS_FLOOR)
-					Island[y][x + 1] = MIX_GRASS_BRICK_LEFT_FLOOR;
+					Island[y][x + 1] = MIX_GRASS_BRICK_RIGHT_FLOOR;
 				if (Island[y][x] == BRICK_FLOOR && Island[y][x - 1] == GRASS_FLOOR)
-					Island[y][x - 1] = MIX_GRASS_BRICK_RIGHT_FLOOR;
+					Island[y][x - 1] = MIX_GRASS_BRICK_LEFT_FLOOR;
 
 				if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x] == GRASS_FLOOR)
 					Island[y + 1][x] = MIX_GRASS_BRICK_LEFT_FLOOR;
@@ -785,6 +785,20 @@ void MapDetailing(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW]) {
 				Map[y + 1][x] = MIX_GRASS_BRICK_LEFT_BASE;
 			if (Map[y][x] == MIX_GRASS_BRICK_RIGHT_FLOOR && Map[y + 1][x] == 0)
 				Map[y + 1][x] = MIX_GRASS_BRICK_RIGHT_BASE;
+		}
+	}
+
+	//correcting minor generation errors
+	for (int y = 0; y <= MAPH; y++) {
+		for (int x = 0; x <= MAPW; x++) {
+			if (Map[y][x] == MIX_GRASS_BRICK_LEFT_BASE && Map[y][x + 1] == MIX_GRASS_BRICK_LEFT_BASE) {
+				Map[y][x] = GRASS_BASE;
+				Map[y][x + 1] = GRASS_BASE;
+			}
+			if (Map[y][x] == MIX_GRASS_BRICK_RIGHT_BASE && Map[y][x + 1] == MIX_GRASS_BRICK_RIGHT_BASE) {
+				Map[y][x] = GRASS_BASE;
+				Map[y][x + 1] = GRASS_BASE;
+			}
 		}
 	}
 
