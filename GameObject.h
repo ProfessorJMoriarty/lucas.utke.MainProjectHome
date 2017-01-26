@@ -14,7 +14,6 @@ private:
 	bool collidable;
 	bool selected;
 	bool collision;
-	bool ColDir[2];
 
 protected:
 	double x;
@@ -28,6 +27,9 @@ protected:
 
 	int boundX;
 	int boundY;
+
+	double BaseX;
+	double BaseY;
 
 	int maxFrame;
 	int curFrame;
@@ -72,6 +74,12 @@ public:
 
 	int GetID() { return ID; }
 	void SetID(int ID) { GameObject::ID = ID; }
+	
+	double GetBaseX() { return BaseX; }
+	double GetBaseY() { return BaseY; }
+
+	void SetBaseX(double BaseX) { GameObject::BaseX = BaseX; }
+	void SetBaseY(double BaseY) { GameObject::BaseY = BaseY; }
 
 	bool GetCollision() { return collision; };
 	void SetCollision(bool collision) { GameObject::collision = collision; };

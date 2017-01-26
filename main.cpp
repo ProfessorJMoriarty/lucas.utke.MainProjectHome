@@ -437,13 +437,12 @@ int main(int argc, char **argv) {
 					//keys[NUM_2] = false;
 				}
 
-
-
 				//collisions
 				for (iter = objects.begin(); iter != objects.end(); ++iter)
 				{
 					if (!(*iter)->Collidable() || (*iter)->GetID() == TERRAIN_EMPTY) continue;//checks whether collidable or whether terrain. if terrain is checked, due to it being a large #, will crash game. 
-
+					//if ((*iter)->GetX() > cameraXPos + SCREENW || (*iter)->GetX() < cameraXPos) continue;
+					//if ((*iter)->GetY() > cameraYPos + SCREENH || (*iter)->GetY() < cameraYPos) continue;
 					for (iter2 = iter; iter2 != objects.end(); ++iter2)
 					{
 						//if (sqrt(((*iter)->GetX() - (*iter2)->GetX())*((*iter)->GetX() - (*iter2)->GetX()) + ((*iter)->GetY() - (*iter2)->GetY())*((*iter)->GetY() - (*iter2)->GetY())) >= COL_RANGEX / 2) continue;
@@ -586,8 +585,8 @@ void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &
 		for (int y = 0; y <= MAPH; y++) {
 			for (int x = 0; x <= MAPW; x++) {
 				if (Map[y][x] == GRASS_BASE) {
-					PlayerPosX = x*38 - cameraXPos;
-					PlayerPosY = y*50 - cameraYPos;
+					PlayerPosX = x * 38 - cameraXPos;
+					PlayerPosY = y * 50 - cameraYPos;
 					//cameraXPos = PlayerPosX - (SCREENW / 2);
 					//cameraYPos = PlayerPosY - (SCREENH / 2);
 					y = MAPH + 1, x = MAPW + 1;//exit
@@ -665,10 +664,6 @@ void CreateIsland(int Island[ISLANDH][ISLANDW]) {
 
 		if (path_h < ISLANDH && path_h > 0 && path_w < ISLANDW && path_w > 0)
 			Island[path_h][path_w] = GRASS_FLOOR;
-		else {
-			cout << "end" << endl;
-			continue;
-		}
 	}
 	//adding in brick within grass
 	for (int y = 0; y + 2 <= ISLANDH; y += 2) {
@@ -705,69 +700,83 @@ void CreateIsland(int Island[ISLANDH][ISLANDW]) {
 	}
 	//adding in mixed blocks:
 
-	//mixing scaffolding and brick
+
 	for (int y = 0; y <= ISLANDH; y++) {
 		for (int x = 0; x <= ISLANDW; x++) {
-				if (Island[y][x] == BRICK_FLOOR && Island[y][x + 1] == SCAFFOLD_FLOOR)
-					Island[y][x + 1] = MIX_SCAFFOLD_BRICK_LEFT_FLOOR;
-				if (Island[y][x] == BRICK_FLOOR && Island[y][x - 1] == SCAFFOLD_FLOOR)
-					Island[y][x - 1] = MIX_SCAFFOLD_BRICK_RIGHT_FLOOR;
 
-				if (Island[y][x] == SCAFFOLD_FLOOR && Island[y][x + 1] == BRICK_FLOOR)
-					Island[y][x] = MIX_SCAFFOLD_BRICK_LEFT_FLOOR;
-				if (Island[y][x] == SCAFFOLD_FLOOR && Island[y][x - 1] == BRICK_FLOOR)
-					Island[y][x] = MIX_SCAFFOLD_BRICK_RIGHT_FLOOR;
+			//mixing scaffolding and brick:
 
+			//cardinal directions-
+			if (Island[y][x] == BRICK_FLOOR && Island[y][x + 1] == SCAFFOLD_FLOOR)
+				Island[y][x + 1] = MIX_SCAFFOLD_BRICK_RIGHT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y][x - 1] == SCAFFOLD_FLOOR)
+				Island[y][x - 1] = MIX_SCAFFOLD_BRICK_LEFT_FLOOR;
 
-				//mixing grass and brick:
+			if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x] == SCAFFOLD_FLOOR)
+				Island[y + 1][x] = MIX_SCAFFOLD_BRICK_LEFT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x] == SCAFFOLD_FLOOR)
+				Island[y - 1][x] = MIX_SCAFFOLD_BRICK_RIGHT_FLOOR;
 
-				//cardinal directions-
-				if (Island[y][x] == BRICK_FLOOR && Island[y][x + 1] == GRASS_FLOOR)
-					Island[y][x + 1] = MIX_GRASS_BRICK_RIGHT_FLOOR;
-				if (Island[y][x] == BRICK_FLOOR && Island[y][x - 1] == GRASS_FLOOR)
-					Island[y][x - 1] = MIX_GRASS_BRICK_LEFT_FLOOR;
+			//diagonals-
+			if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x + 1] == SCAFFOLD_FLOOR)
+				Island[y + 1][x + 1] = MIX_SCAFFOLD_BRICK_RIGHT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x - 1] == SCAFFOLD_FLOOR)
+				Island[y - 1][x - 1] = MIX_SCAFFOLD_BRICK_LEFT_FLOOR;
 
-				if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x] == GRASS_FLOOR)
-					Island[y + 1][x] = MIX_GRASS_BRICK_LEFT_FLOOR;
-				if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x] == GRASS_FLOOR)
-					Island[y - 1][x] = MIX_GRASS_BRICK_RIGHT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x - 1] == SCAFFOLD_FLOOR)
+				Island[y + 1][x - 1] = MIX_SCAFFOLD_BRICK_LEFT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x + 1] == SCAFFOLD_FLOOR)
+				Island[y - 1][x + 1] = MIX_SCAFFOLD_BRICK_RIGHT_FLOOR;
 
-				//diagonals-
-				if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x + 1] == GRASS_FLOOR)
-					Island[y + 1][x + 1] = MIX_GRASS_BRICK_RIGHT_FLOOR;
-				if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x - 1] == GRASS_FLOOR)
-					Island[y - 1][x - 1] = MIX_GRASS_BRICK_LEFT_FLOOR;
+			//mixing grass and brick:
 
-				if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x - 1] == GRASS_FLOOR)
-					Island[y + 1][x - 1] = MIX_GRASS_BRICK_LEFT_FLOOR;
-				if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x + 1] == GRASS_FLOOR)
-					Island[y - 1][x + 1] = MIX_GRASS_BRICK_RIGHT_FLOOR;
+			//cardinal directions-
+			if (Island[y][x] == BRICK_FLOOR && Island[y][x + 1] == GRASS_FLOOR)
+				Island[y][x + 1] = MIX_GRASS_BRICK_RIGHT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y][x - 1] == GRASS_FLOOR)
+				Island[y][x - 1] = MIX_GRASS_BRICK_LEFT_FLOOR;
 
-				/*	//adding in base
-	for (int y = 0; y <= ISLANDH; y++) {
-		for (int x = 0; x <= ISLANDW; x++) {
-			if (Island[y][x] == SCAFFOLD_FLOOR && Island[y+1][x] == 0)
-				Island[y + 1][x] = SCAFFOLD_BASE;
-			if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x] == 0)
-				Island[y + 1][x] = BRICK_BASE;
-			if (Island[y][x] == GRASS_FLOOR && Island[y + 1][x] == 0)
-				Island[y + 1][x] = GRASS_BASE;
-			if (Island[y][x] == MIX_SCAFFOLD_BRICK_LEFT_FLOOR && Island[y + 1][x] == 0)
-				Island[y + 1][x] = MIX_SCAFFOLD_BRICK_LEFT_BASE;
-			if (Island[y][x] == MIX_SCAFFOLD_BRICK_RIGHT_FLOOR && Island[y + 1][x] == 0)
-				Island[y + 1][x] = MIX_SCAFFOLD_BRICK_RIGHT_BASE;
-			if (Island[y][x] == MIX_GRASS_BRICK_LEFT_FLOOR && Island[y + 1][x] == 0)
-				Island[y + 1][x] = MIX_GRASS_BRICK_LEFT_BASE;
-			if (Island[y][x] == MIX_GRASS_BRICK_RIGHT_FLOOR && Island[y + 1][x] == 0)
-				Island[y + 1][x] = MIX_GRASS_BRICK_RIGHT_BASE;
-		}
-	}*/
-		//	}
+			if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x] == GRASS_FLOOR)
+				Island[y + 1][x] = MIX_GRASS_BRICK_LEFT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x] == GRASS_FLOOR)
+				Island[y - 1][x] = MIX_GRASS_BRICK_RIGHT_FLOOR;
+
+			//diagonals-
+			if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x + 1] == GRASS_FLOOR)
+				Island[y + 1][x + 1] = MIX_GRASS_BRICK_RIGHT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x - 1] == GRASS_FLOOR)
+				Island[y - 1][x - 1] = MIX_GRASS_BRICK_LEFT_FLOOR;
+
+			if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x - 1] == GRASS_FLOOR)
+				Island[y + 1][x - 1] = MIX_GRASS_BRICK_LEFT_FLOOR;
+			if (Island[y][x] == BRICK_FLOOR && Island[y - 1][x + 1] == GRASS_FLOOR)
+				Island[y - 1][x + 1] = MIX_GRASS_BRICK_RIGHT_FLOOR;
+
+			/*	//adding in base
+for (int y = 0; y <= ISLANDH; y++) {
+	for (int x = 0; x <= ISLANDW; x++) {
+		if (Island[y][x] == SCAFFOLD_FLOOR && Island[y+1][x] == 0)
+			Island[y + 1][x] = SCAFFOLD_BASE;
+		if (Island[y][x] == BRICK_FLOOR && Island[y + 1][x] == 0)
+			Island[y + 1][x] = BRICK_BASE;
+		if (Island[y][x] == GRASS_FLOOR && Island[y + 1][x] == 0)
+			Island[y + 1][x] = GRASS_BASE;
+		if (Island[y][x] == MIX_SCAFFOLD_BRICK_LEFT_FLOOR && Island[y + 1][x] == 0)
+			Island[y + 1][x] = MIX_SCAFFOLD_BRICK_LEFT_BASE;
+		if (Island[y][x] == MIX_SCAFFOLD_BRICK_RIGHT_FLOOR && Island[y + 1][x] == 0)
+			Island[y + 1][x] = MIX_SCAFFOLD_BRICK_RIGHT_BASE;
+		if (Island[y][x] == MIX_GRASS_BRICK_LEFT_FLOOR && Island[y + 1][x] == 0)
+			Island[y + 1][x] = MIX_GRASS_BRICK_LEFT_BASE;
+		if (Island[y][x] == MIX_GRASS_BRICK_RIGHT_FLOOR && Island[y + 1][x] == 0)
+			Island[y + 1][x] = MIX_GRASS_BRICK_RIGHT_BASE;
+	}
+}*/
+//	}
 		}
 	}
 }
 void MapDetailing(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW]) {
-	
+
 	//adding in base blocks
 	for (int y = 0; y <= MAPH; y++) {
 		for (int x = 0; x <= MAPW; x++) {
@@ -816,7 +825,7 @@ void MapDetailing(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW]) {
 				MapDetail[y][x] = DETAIL_MIX_SCAFFOLD_BRICK_LEFT;
 			else if (Map[y][x] == MIX_SCAFFOLD_BRICK_RIGHT_BASE)
 				MapDetail[y][x] = DETAIL_MIX_SCAFFOLD_BRICK_RIGHT;
-			else if (Map[y][x] == MIX_SCAFFOLD_BRICK_RIGHT_BASE)
+			else if (Map[y][x] == MIX_GRASS_BRICK_RIGHT_BASE)
 				MapDetail[y][x] = DETAIL_MIX_GRASS_BRICK_RIGHT;
 			else if (Map[y][x] == MIX_GRASS_BRICK_LEFT_BASE)
 				MapDetail[y][x] = DETAIL_MIX_GRASS_BRICK_LEFT;
@@ -835,7 +844,7 @@ void AllegroOverlay(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW], ALLEGRO_BITM
 		for (int x = 0; x <= MAPW; x++) {
 
 			if (Map[y][x] == SCAFFOLD_FLOOR) {
-				Render(TerrainImage, x, y, rand () % 7, 0, DIMW, DIMH, cameraXPos, cameraYPos, false);
+				Render(TerrainImage, x, y, rand() % 7, 0, DIMW, DIMH, cameraXPos, cameraYPos, false);
 			}
 			else if (Map[y][x] == SCAFFOLD_BASE) {
 				Render(TerrainImage, x, y, rand() % 7, 1, DIMW, DIMH, cameraXPos, cameraYPos, false);
@@ -860,7 +869,7 @@ void AllegroOverlay(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW], ALLEGRO_BITM
 				Render(TerrainImage, x, y, rand() % 7, 7, DIMW, DIMH, cameraXPos, cameraYPos, false);
 			}
 			else if (Map[y][x] == MIX_SCAFFOLD_BRICK_RIGHT_FLOOR) {
-				Render(TerrainImage, x, y, rand() % 7, 7, DIMW, DIMH, cameraXPos, cameraYPos, false);
+				Render(TerrainImage, x, y, rand() % 7, 8, DIMW, DIMH, cameraXPos, cameraYPos, false);
 			}
 			else if (Map[y][x] == MIX_SCAFFOLD_BRICK_RIGHT_BASE) {
 				Render(TerrainImage, x, y, rand() % 7, 9, DIMW, DIMH, cameraXPos, cameraYPos, false);

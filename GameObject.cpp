@@ -16,7 +16,10 @@ GameObject::GameObject()
 
 	boundX = 0;
 	boundY = 0;
-
+	
+	BaseX = 0;
+	BaseY = 0;
+	
 	maxFrame = 0;
 	curFrame = 0;
 	frameCount = 0;
@@ -32,10 +35,6 @@ GameObject::GameObject()
 
 	alive = true;
 	collidable = true;
-
-	for (int a = 0; a < 2; a++){
-		ColDir[a] = false;
-	}
 }
 
 void GameObject::Destroy(){}
@@ -53,6 +52,9 @@ void GameObject::Init(double x, double y, double velX, double velY, double dirX,
 
 	GameObject::boundX = boundX;
 	GameObject::boundY = boundY;//size
+
+	GameObject::BaseX = x;
+	GameObject::BaseY = y + boundY;
 }
 
 void GameObject::Update(double cameraX, double cameraY)
@@ -82,25 +84,6 @@ bool GameObject::CheckCollisions(GameObject *otherObject)
 	double newX = velX *dirX;
 	double newY = velY *dirY;
 
-	/*
-	double Rad = boundX / 2, oRad = obX / 2;
-	double rX = x + Rad + newX, rY = y + Rad + newY;
-	double orX = oX + oRad + onewX, orY = oY + oRad + onewY;
-
-	//distance formula
-	if (sqrt((rX - orX)*(rX - orX) + (rY - orY)*(rY - orY)) <= Rad + oRad)
-	return true;
-	else
-	return false;*/
-
-	if (x + boundX + newX > oX + onewX && x + newX < oX + obX + onewX){
-		//cout << "blah1" << endl;
-		ColDir[0] = true;
-	}
-	if (y + boundY + newY > oY + onewY && y + newY < oY + obY + onewY){
-		//cout << "blah2" << endl;
-		ColDir[1] = true;
-	}
 	if (x + boundX + newX > oX + onewX &&
 		x + newX < oX + obX + onewX &&
 		y + boundY + newY > oY + onewY &&
@@ -108,13 +91,6 @@ bool GameObject::CheckCollisions(GameObject *otherObject)
 		return true;
 	else
 		return false;
-	/*if (x + boundX + newX > oX - obX &&
-		x - boundX + newX < oX + obX &&
-		y + boundY + newY > oY - obY &&
-		y - boundY + newY < oY + obY)-
-		return true;
-		else
-		return false;*/
 }
 
 void GameObject::Collided(GameObject *otherObject)

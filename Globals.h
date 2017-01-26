@@ -1,7 +1,7 @@
 #pragma once
-const int DIMW = 50, DIMH = 50;//ground tile size
+const int DIMW = 200, DIMH = 200;//ground tile size
 const int SCREENW = 1680, SCREENH = 1050;//console size
-const int WORLDW = 6000, WORLDH = 6000;//map size
+const int WORLDW = (20*DIMW)+SCREENW, WORLDH = (20*DIMH)+SCREENH;//map size
 const int MAPW = WORLDW / DIMW, MAPH = WORLDH / DIMH;//for ground matrix
 
 //const int ISLANDBORDERH = 6, ISLANDBORDERW = 6;
@@ -11,7 +11,7 @@ const int ISLANDW = 10, ISLANDH = 10;
 const int FPS = 60;
 const int PLAYERVELX = 5, PLAYERVELY = 5;
 
-enum ID{ PLAYER, FOOTSOLDIER, TERRAIN_EMPTY, TERRAIN_FULL, WEAPON, BULLET, MISC};
+enum ID{ PLAYER, FOOTSOLDIER, TERRAIN_EMPTY, TERRAIN_FULL, WEAPON, BULLET, MISC, WALKABLE};
 enum STATE{ TITLE, PLAYING, LOST };
 
 const int COL_RANGEX = DIMW*3, COL_NUMX = WORLDW / COL_RANGEX;
