@@ -829,13 +829,16 @@ void MapDetailing(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW]) {
 				MapDetail[y][x] = DETAIL_MIX_GRASS_BRICK_RIGHT;
 			else if (Map[y][x] == MIX_GRASS_BRICK_LEFT_BASE)
 				MapDetail[y][x] = DETAIL_MIX_GRASS_BRICK_LEFT;
-
-			//stone walls
-			else if (Map[y][x] == BRICK_FLOOR && Map[y - 1][x] == 0)//Map[y-1][x] != BRICK_FLOOR && Map[y - 1][x] != MIX_GRASS_BRICK_LEFT_FLOOR != MIX_GRASS_BRICK_RIGHT_FLOOR)
-				MapDetail[y - 1][x] = DETAIL_BRICK_WALL;
 		}
 	}
 
+	//stone walls
+	for (int y = 0; y <= MAPH; y++) {
+		for (int x = 0; x <= MAPW; x++) {
+			if (Map[y][x] == BRICK_FLOOR && Map[y - 1][x] == 0)//Map[y-1][x] != BRICK_FLOOR && Map[y - 1][x] != MIX_GRASS_BRICK_LEFT_FLOOR != MIX_GRASS_BRICK_RIGHT_FLOOR)
+				MapDetail[y - 1][x] = DETAIL_BRICK_WALL;
+		}
+	}
 }
 
 void AllegroOverlay(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, double cameraXPos, double cameraYPos) {
@@ -917,6 +920,16 @@ void AllegroOverlay(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW], ALLEGRO_BITM
 
 			else if (MapDetail[y][x] == DETAIL_BRICK_WALL) {
 				Render(TerrainImage, x, y, rand() % 7, 15, DIMW, DIMH, cameraXPos, cameraYPos, false);
+			}
+		}
+	}
+	for (int y = 0; y <= MAPH; y++) {
+		for (int x = 0; x <= MAPW; x++) {
+			if (Map[y][x] == GRASS_FLOOR || Map[y][x] == MIX_GRASS_BRICK_RIGHT_FLOOR || Map[y][x] == MIX_GRASS_BRICK_LEFT_FLOOR) {
+				Render(TerrainImage, x + 1, y, 0, rand() % 2 + 16, DIMW, DIMH, cameraXPos, cameraYPos, false);//right
+				Render(TerrainImage, x, y + 1, 1, rand() % 2 + 16, DIMW, DIMH, cameraXPos, cameraYPos, false);//bot
+				Render(TerrainImage, x - 1, y, 2, rand() % 2 + 16, DIMW, DIMH, cameraXPos, cameraYPos, false);//left
+				Render(TerrainImage, x, y - 1, 3, rand() % 2 + 16, DIMW, DIMH, cameraXPos, cameraYPos, false);//top
 			}
 		}
 	}

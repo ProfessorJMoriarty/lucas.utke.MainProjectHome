@@ -1,7 +1,7 @@
 #pragma once
-const int DIMW = 200, DIMH = 200;//ground tile size
+const int DIMW = 100, DIMH = 100;//ground tile size
 const int SCREENW = 1680, SCREENH = 1050;//console size
-const int WORLDW = (20*DIMW)+SCREENW, WORLDH = (20*DIMH)+SCREENH;//map size
+const int WORLDW = (40*DIMW)+SCREENW, WORLDH = (40*DIMH)+SCREENH;//map size
 const int MAPW = WORLDW / DIMW, MAPH = WORLDH / DIMH;//for ground matrix
 
 //const int ISLANDBORDERH = 6, ISLANDBORDERW = 6;
@@ -52,3 +52,8 @@ const int DETAIL_MIX_GRASS_BRICK_LEFT = 100;
 const int DETAIL_MIX_GRASS_BRICK_RIGHT = 105;
 
 const int DETAIL_BRICK_WALL = 110;
+
+const int DETAIL_GRASS_EDGE_RIGHT = 115;
+const int DETAIL_GRASS_EDGE_BOT = 120;
+const int DETAIL_GRASS_EDGE_LEFT = 125;
+const int DETAIL_GRASS_EDGE_TOP = 130;
