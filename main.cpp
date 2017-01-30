@@ -5,6 +5,7 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_color.h>
 #include <Windows.h>
 #include <stdlib.h>
 #include <time.h>
@@ -23,6 +24,7 @@
 #include "Bullet.h"
 #include "Background.h"
 #include "Bird.h"
+#include "Cloud.h"
 
 #define PI 3.14159265
 #define DEGREES(x) int((x)/360.0*0xFFFFFF)
@@ -34,16 +36,16 @@ bool keys[] = { false, false, false, false, false, false, false, false, false, f
 enum KEYS { UP, DOWN, LEFT, RIGHT, MOUSE_BUTTON, NUM_1, NUM_2, NUM_3, ENTER, SHIFT };
 
 //Terrain creation
-void NewMap(ALLEGRO_BITMAP *TerrainImage, int Map[MAPH][MAPW], double cameraXPos, double cameraYPos);
+void NewMap(ALLEGRO_BITMAP *TerrainImage, int Map[MAPH][MAPW], double cameraXPos, double cameraYPos, ALLEGRO_BITMAP *bgImage);
 
 //within NewMap
-void AllegroOverlay(int Map[MAPH][MAPW], int MapDetailing[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, double cameraXPos, double cameraYPos);
+void AllegroOverlay(int Map[MAPH][MAPW], int MapDetailing[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, double cameraXPos, double cameraYPos, ALLEGRO_BITMAP *bgImage);
 void Render(ALLEGRO_BITMAP *TerrainImage, int game_x, int game_y, int image_x, int image_y, int size_x, int size_y, double cameraXPos, double cameraYPos, bool collision);
 
 void CreateIsland(int Island[ISLANDH][ISLANDW]);
 void MapDetailing(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW]);
 
-void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &PlayerPosX, double &PlayerPosY, double &cameraXPos, double &cameraYPos, ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_BITMAP *Tree_2_Image, ALLEGRO_BITMAP *Tree_3_Image, ALLEGRO_BITMAP *Tree_4_Image, ALLEGRO_BITMAP *Tree_5_Image, ALLEGRO_BITMAP *bgImage, ALLEGRO_BITMAP *BirdImage, Player *player);
+void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &PlayerPosX, double &PlayerPosY, double &cameraXPos, double &cameraYPos, ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *bgImage, Player *player, Cloud *cloud, ALLEGRO_BITMAP *CloudImage);
 
 std::list<GameObject *> objects;//used in object creation
 std::list<GameObject *>::iterator iter;
@@ -88,9 +90,8 @@ int main(int argc, char **argv) {
 	//PROJECT VARIABLES
 	//==============================================
 	Player *player;
-
+	
 	player = new Player();
-
 	int state = -1;
 
 	ALLEGRO_BITMAP *FootSoldierImage = NULL;
@@ -107,6 +108,7 @@ int main(int argc, char **argv) {
 	ALLEGRO_BITMAP *Tree_4_Image = NULL;
 	ALLEGRO_BITMAP *Tree_5_Image = NULL;
 	ALLEGRO_BITMAP *BirdImage = NULL;
+	ALLEGRO_BITMAP *CloudImage = NULL;
 
 	ALLEGRO_SAMPLE *song = NULL;
 	ALLEGRO_SAMPLE *shot = NULL;
@@ -149,10 +151,17 @@ int main(int argc, char **argv) {
 	font18 = al_load_font("arial.ttf", 18, 0);
 	al_reserve_samples(15);
 
-	//bgImage = al_load_bitmap("ParaSkyImage.png");
-
+	bgImage = al_load_bitmap("ParaSkyImage.png");
 	//Background *bg = new Background(bgImage);
 	//objects.push_back(bg);
+	TitleScreenImage = al_load_bitmap("TitleScreenImage.png");
+	TitleScreen = new Background(TitleScreenImage);
+
+	CloudImage = al_load_bitmap("CloudImage.png");
+	al_convert_mask_to_alpha(CloudImage, al_map_rgb(255, 255, 255));
+
+	Cloud *cloud = new Cloud(CloudImage);
+	objects.push_back(cloud);
 
 	//bg = new Background(mgImage, 3);//possible later use (used in Space Shooter)
 	//objects.push_back(bg);
@@ -193,8 +202,7 @@ int main(int argc, char **argv) {
 	al_convert_mask_to_alpha(BirdImage, al_map_rgb(255, 255, 255));
 	al_convert_mask_to_alpha(BirdImage, al_map_rgb(181, 230, 29));
 
-	TitleScreenImage = al_load_bitmap("TitleScreenImage.png");
-	TitleScreen = new Background(TitleScreenImage);
+	
 
 	shot = al_load_sample("Gunshot.wav");
 	song = al_load_sample("Titan.mp3");
@@ -204,7 +212,7 @@ int main(int argc, char **argv) {
 
 	al_attach_sample_instance_to_mixer(songInstance, al_get_default_mixer());
 
-	ChangeState(state, TITLE, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, Tree_1_Image, Tree_2_Image, Tree_3_Image, Tree_4_Image, Tree_5_Image, bgImage, BirdImage, player);
+	ChangeState(state, TITLE, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, bgImage, player, cloud, CloudImage);
 
 	srand(time(NULL));
 	//==============================================
@@ -278,10 +286,10 @@ int main(int argc, char **argv) {
 			case ALLEGRO_KEY_ENTER:
 				keys[ENTER] = true;
 				if (state == TITLE) {
-					ChangeState(state, PLAYING, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, Tree_1_Image, Tree_2_Image, Tree_3_Image, Tree_4_Image, Tree_5_Image, bgImage, BirdImage, player);
+					ChangeState(state, PLAYING, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, bgImage, player, cloud, CloudImage);
 				}
 				else if (state == PLAYING)
-					ChangeState(state, TITLE, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, Tree_1_Image, Tree_2_Image, Tree_3_Image, Tree_4_Image, Tree_5_Image, bgImage, BirdImage, player);
+					ChangeState(state, TITLE, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, bgImage, player, cloud, CloudImage);
 				break;
 			case ALLEGRO_KEY_LSHIFT:
 				keys[SHIFT] = true;
@@ -424,7 +432,7 @@ int main(int argc, char **argv) {
 
 				if (keys[NUM_1])//temp
 				{
-					ChangeState(state, PLAYING, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, Tree_1_Image, Tree_2_Image, Tree_3_Image, Tree_4_Image, Tree_5_Image, bgImage, BirdImage, player);
+					ChangeState(state, PLAYING, PlayerImage, PlayerPosX, PlayerPosY, cameraXPos, cameraYPos, TerrainImage, bgImage, player, cloud, CloudImage);
 
 					keys[NUM_1] = false;
 				}
@@ -505,6 +513,7 @@ int main(int argc, char **argv) {
 				for (iter = objects.begin(); iter != objects.end(); ++iter) {
 					(*iter)->Render();
 				}
+				cloud->Render();
 			}
 			//FLIP BUFFERS========================
 			al_flip_display();
@@ -550,7 +559,7 @@ int main(int argc, char **argv) {
 	al_destroy_display(display);
 	return 0;
 }
-void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &PlayerPosX, double &PlayerPosY, double &cameraXPos, double &cameraYPos, ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *Tree_1_Image, ALLEGRO_BITMAP *Tree_2_Image, ALLEGRO_BITMAP *Tree_3_Image, ALLEGRO_BITMAP *Tree_4_Image, ALLEGRO_BITMAP *Tree_5_Image, ALLEGRO_BITMAP *bgImage, ALLEGRO_BITMAP *BirdImage, Player *player)
+void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &PlayerPosX, double &PlayerPosY, double &cameraXPos, double &cameraYPos, ALLEGRO_BITMAP *TerrainImage, ALLEGRO_BITMAP *bgImage, Player *player, Cloud *cloud, ALLEGRO_BITMAP *CloudImage)
 {
 	int counter = 0;
 	bool flag1 = false;
@@ -580,7 +589,7 @@ void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &
 	{
 		int Map[MAPH][MAPW] = {};//matrix setup here!
 
-		NewMap(TerrainImage, Map, cameraXPos, cameraYPos);//function to create game map
+		NewMap(TerrainImage, Map, cameraXPos, cameraYPos, bgImage);//function to create game map
 
 		for (int y = 0; y <= MAPH; y++) {
 			for (int x = 0; x <= MAPW; x++) {
@@ -595,14 +604,15 @@ void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &
 		}
 
 		player->Init(PlayerImage, PlayerPosX, PlayerPosY, 38, 50, 0, 0, PLAYERVELX, PLAYERVELY);
-
 		for (iter = objects.begin(); iter != objects.end(); ++iter)
 		{
 			if ((*iter)->GetID() == PLAYER)
 				iter = objects.erase(iter);
+			if ((*iter)->GetID() == CLOUD)
+				iter = objects.erase(iter);
 		}
 		objects.push_back(player);
-
+		objects.push_back(cloud);
 		al_play_sample_instance(songInstance);
 	}
 	else if (state == LOST)
@@ -610,7 +620,8 @@ void ChangeState(int &state, int newState, ALLEGRO_BITMAP *PlayerImage, double &
 	}
 }
 
-void NewMap(ALLEGRO_BITMAP *TerrainImage, int Map[MAPH][MAPW], double cameraXPos, double cameraYPos)
+//copies Islands into central Map matrix
+void NewMap(ALLEGRO_BITMAP *TerrainImage, int Map[MAPH][MAPW], double cameraXPos, double cameraYPos, ALLEGRO_BITMAP *bgImage)
 {
 	int Island[ISLANDH][ISLANDW] = {};
 	int MapDetail[MAPH][MAPW] = {};
@@ -625,13 +636,16 @@ void NewMap(ALLEGRO_BITMAP *TerrainImage, int Map[MAPH][MAPW], double cameraXPos
 					Map[r_y + y][r_x + x] = Island[r_y][r_x];//copies Island
 				}
 			}
+			x += 1;
 		}
+		y += 1;
 	}
 
 	MapDetailing(Map, MapDetail);
-	AllegroOverlay(Map, MapDetail, TerrainImage, cameraXPos, cameraYPos);
+	AllegroOverlay(Map, MapDetail, TerrainImage, cameraXPos, cameraYPos, bgImage);
 }
 
+//creates basic island, with stone, brick and grass variations
 void CreateIsland(int Island[ISLANDH][ISLANDW]) {
 
 	//refreshing matrix
@@ -775,6 +789,8 @@ for (int y = 0; y <= ISLANDH; y++) {
 		}
 	}
 }
+
+//adds in base of island, detailing on base edges, minor generaton errors, etc.
 void MapDetailing(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW]) {
 
 	//adding in base blocks
@@ -841,8 +857,12 @@ void MapDetailing(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW]) {
 	}
 }
 
-void AllegroOverlay(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, double cameraXPos, double cameraYPos) {
 
+//references Map matrix for location of images on console window
+void AllegroOverlay(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, double cameraXPos, double cameraYPos, ALLEGRO_BITMAP *bgImage) {
+	
+	//Render(bgImage, 0, 0, 0, 0, 5000, 5000, cameraXPos, cameraYPos, false);
+	
 	for (int y = 0; y <= MAPH; y++) {
 		for (int x = 0; x <= MAPW; x++) {
 
@@ -935,6 +955,7 @@ void AllegroOverlay(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW], ALLEGRO_BITM
 	}
 	//main loop
 }
+//passes data from AllegroOverlay to reate a new GameObject
 void Render(ALLEGRO_BITMAP *Image, int game_x, int game_y, int image_x, int image_y, int size_x, int size_y, double cameraXPos, double cameraYPos, bool collision)
 {
 	Terrain *terrain = new Terrain();
