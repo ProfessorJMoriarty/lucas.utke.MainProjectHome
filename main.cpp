@@ -40,7 +40,7 @@ void NewMap(ALLEGRO_BITMAP *TerrainImage, int Map[MAPH][MAPW], double cameraXPos
 
 //within NewMap
 void AllegroOverlay(int Map[MAPH][MAPW], int MapDetailing[MAPH][MAPW], ALLEGRO_BITMAP *TerrainImage, double cameraXPos, double cameraYPos, ALLEGRO_BITMAP *bgImage, ALLEGRO_BITMAP *CloudImage);
-void Render(ALLEGRO_BITMAP *TerrainImage, int game_x, int game_y, int image_x, int image_y, int size_x, int size_y, double cameraXPos, double cameraYPos, bool collision);
+void Render(ALLEGRO_BITMAP *TerrainImage, double game_x, double game_y, int image_x, int image_y, int size_x, int size_y, double cameraXPos, double cameraYPos, bool collision);
 
 void CreateIsland(int Island[ISLANDH][ISLANDW]);
 void MapDetailing(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW]);
@@ -449,7 +449,7 @@ int main(int argc, char **argv) {
 					objects.reverse();
 					//keys[NUM_3] = false;
 				}
-
+				/*
 				//managing render order
 				int greatest = 0;
 				for (iter = objects.begin(); iter != objects.end(); ++iter) {				
@@ -461,7 +461,7 @@ int main(int argc, char **argv) {
 						objects.push_front(*iter);
 						iter = objects.erase(iter);
 					}
-				}
+				}*/
 
 				//collisions
 				for (iter = objects.begin(); iter != objects.end(); ++iter)
@@ -983,13 +983,26 @@ void AllegroOverlay(int Map[MAPH][MAPW], int MapDetail[MAPH][MAPW], ALLEGRO_BITM
 			}
 		}
 	}
+	//smaller grass detailing
+	for (int y = 0; y <= MAPH; y++) {
+		for (int x = 0; x <= MAPW; x++) {
+			if (Map[y][x] == GRASS_FLOOR || Map[y][x] == MIX_GRASS_BRICK_RIGHT_FLOOR || Map[y][x] == MIX_GRASS_BRICK_LEFT_FLOOR) {
+				for (int a = 0; a <= 4; a++) {
+					Terrain *terrain = new Terrain();
+					terrain->Init(TerrainImage, (x*DIMW + (rand() % (DIMW-16))) - cameraXPos, (y*DIMH + (rand() % (DIMH-28))) - cameraYPos, DIMW*rand()%2, DIMH*19, 16, 28, false);
+					objects.push_back(terrain);
+					//Render(TerrainImage, x + ((rand() % DIMW) / DIMW), y + ((rand() % DIMH) / DIMH), rand() % 2, 19, 16, 28, cameraXPos, cameraYPos, false);
+				}
+			}
+		}
+	}
 	//main loop
 	Cloud *cloud = new Cloud(CloudImage);
 	cloud->Init(0, 0, 1, 1, .5, 0, 5680, 5050);
 	objects.push_back(cloud);
 }
 //passes data from AllegroOverlay to reate a new GameObject
-void Render(ALLEGRO_BITMAP *Image, int game_x, int game_y, int image_x, int image_y, int size_x, int size_y, double cameraXPos, double cameraYPos, bool collision)
+void Render(ALLEGRO_BITMAP *Image, double game_x, double game_y, int image_x, int image_y, int size_x, int size_y, double cameraXPos, double cameraYPos, bool collision)
 {
 	Terrain *terrain = new Terrain();
 	terrain->Init(Image, (game_x*DIMW) - cameraXPos, (game_y*DIMH) - cameraYPos, DIMW*image_x, DIMH*image_y, size_x, size_y, collision);
